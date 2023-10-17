@@ -1,92 +1,72 @@
 ---
-
 - hosts: all
   become: true
   pre_tasks:
 
-  - name: install updates (CentOS)
+  - name: update repository index (CentOS)
     tags: always
-    dnf:
-      update_only: yes
+    yum:
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "Centos"
-
   - name: install updates (Ubuntu)
     tags: always
     apt:
-      upgrade: dist
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "Ubuntu"
+
+- hosts: all
+  become: true
+  roles:
+    -  role: base/tasks
+
+- hosts: workstations
+  become: true
+  roles:
+    -  role: workstations/tasks
 
 - hosts: web_servers
   become: true
-  tasks:
-
-  - name: install apache and php for Ubuntu servers
-    tags: apache, apache2, Ubuntu
-    apt:
-      name:
-        - apache2
-        - libapache2-mod-php
-      state: latest
-    when: ansible_distribution == "Ubuntu"
-
-  - name: install apache and php for centOS servers
-    tags: apache, Centos, httpd
-    dnf:
-      name:
-        - httpd
-        - php
-      state: latest
-    when: ansible_distribution == "Centos"
-
-  - name: start httpd (Centos)
-    tags: apache, Centos, httpd
-    service:
-      name: httpd
-      state: started
-    when: ansible_distribution == "CentOS"
-
-  - name: copy default html file for site
-    tags: apache, apache2, httpd
-    copy:
-      src: default_site.html
-      dest: /var/www/html/index.html
-      owner: root
-      group: root
-      mode: 0644
+  roles:
+    -  role: web_servers/tasks
 
 - hosts: db_servers
   become: true
-  tasks:
-
-  - name: install mariadb package (Ubuntu)
-    tags: Ubuntu, db, mariadb
-    apt:
-      name: mariadb-server
-      state: latest
-    when: ansible_distribution == "Ubuntu"
-
-  - name: "Mariadb- Restarting/Enabling"
-    service:
-      name: mariadb
-      state: restarted
-      enabled: true
-
-  - name: install mariadb package (CentOS)
-    tags: Centos, db, mariadb
-    yum:
-      name: mariadb-server
-      state: latest
-    when: ansible_distribution == "Centos"
-
+  roles:
+    -  role: db_servers/tasks
 
 - hosts: file_servers
   become: true
-  tasks:
+  roles:
+    -  role: file_servers/tasks
 
-  - name: install samba package
-    tags: samba
-    package:
-      name: samba
-      state: latest
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
